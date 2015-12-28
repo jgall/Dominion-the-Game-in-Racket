@@ -54,6 +54,7 @@
 
 ;; TODO: attack cards and reaction cards....
 
+
 ;; A Victory-Card is a (make-victory-card String Number Number)
 (define-struct victory-card (name value cost))
 (define ESTATE (make-victory-card "Estate" 1 2))
@@ -134,6 +135,10 @@
                                                     (create-add-actions 2)) '()))
 
 
+;; (define MILITIA (make-action-card "Militia" 4 (list (create-draw-cards 2)) militia-func))
+
+
+
 
 
 ;; A World-Function has the signature: World -> World
@@ -148,6 +153,11 @@
 
 ;; A World is a (make-world [List-of Player] [List-of Pair] Number)
 (define-struct world (players table turn))
+
+(define (end-turn w)
+  (make-world (world-players w)
+              (world-table w)
+              (modulo (add1 (world-turn w)) (length (world-players w)))))
 
 
 
@@ -212,7 +222,7 @@
 ;; display-player-hand : [List-of Card] -> any/c
 (define (display-player-hand cards)
   (if (empty? cards)
-      "cards drawn..."
+      "Cards Drawn..."
       (let ([x (new button% [parent player-board]
                     [label (name->bitmap (card-name (first cards)))]
                     [callback (λ (button event)
@@ -230,15 +240,17 @@
 (define money-amt (new message% [parent bottom-panel] [label "Money: 0,"]))
 (define buy-amt (new message% [parent bottom-panel] [label "Buys: 1"]))
 (define to-buy-phase-button (new button% [parent bottom-panel]
-                                 [label "Go to buy phase"]
+                                 [label "Play Treasures"]
                                  [callback (λ (button event)
-                                             (send msg set-label "to buy phase"))]))
+                                             (send msg set-label "Play Treasures"))]))
 (define end-Turn-button (new button% [parent bottom-panel]
                              [label "End Turn"]
                              [callback (λ (button event)
-                                         (send msg set-label "end turn"))]))
+                                         (set! world0 (end-turn world0)))]))
 
 ;; CREATES THE GUI
 (send frame show true)
+
+
 
 
