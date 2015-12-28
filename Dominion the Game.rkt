@@ -159,6 +159,11 @@
               (world-table w)
               (modulo (add1 (world-turn w)) (length (world-players w)))))
 
+(define (apply-actions ac w)
+  (set! world0 (foldr (λ (f) (make-world (list-ref (world-players w) (world-turn w))
+                                         (world-table w)
+                                         (world-turn w))) w (action-card-actions ac))))
+
 
 
 (define player1 (make-player (list ESTATE ESTATE ESTATE COPPER COPPER)
@@ -207,7 +212,9 @@
       (let ([x (new button% [parent buy-board]
                  [label (name->bitmap (card-name (first alist)))]
                  [callback (λ (button event)
-                             (send msg set-label (card-name (first alist))))])])
+                             (if (action-card? (first alist))
+                                 (apply-actions (first alist))
+                                 "no action..."))])])
         (create-buy-buttons (rest alist)))))
 (define buy-board (new horizontal-panel% [parent frame]
                    [alignment '(center top)]))
