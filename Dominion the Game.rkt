@@ -43,14 +43,6 @@
       (action-card? var)
       (victory-card? var)))
 
-;; lookup-card : String [List-of Pair] -> Pair
-(define (lookup-card name alist)
-  (if (empty? alist)
-      (error "Card Not Found...")
-      (if (string=? name (car (first alist)))
-          (first alist)
-          (lookup-card name (rest alist)))))
-
 ;; A Treasure-Card is a (make-treasure-card String Number Number)
 (define-struct treasure-card (name value cost))
 (define COPPER (make-treasure-card "Copper" 1 0))
@@ -176,28 +168,18 @@
 
 
 
-(define card-img-list (list (cons "Village"
-                                  (make-object bitmap% "resources/village.jpg"
-                                    'unknown false false 4.0))
-                            (cons "Copper"
-                                  (make-object bitmap% "resources/copper.jpg"
-                                    'unknown false false 4.0))
-                            (cons "Silver"
-                                  (make-object bitmap% "resources/silver.jpg"
-                                    'unknown false false 4.0))
-                            (cons "Gold"
-                                  (make-object bitmap% "resources/gold.jpg"
-                                    'unknown false false 4.0))
-                            (cons "Estate"
-                                  (make-object bitmap% "resources/estate.jpg"
-                                    'unknown false false 4.0))
-                            (cons "Duchy"
-                                  (make-object bitmap% "resources/duchy.jpg"
-                                    'unknown false false 4.0))
-                            (cons "Province"
-                                  (make-object bitmap% "resources/province.jpg"
-                                    'unknown false false 4.0))))
-                            
+(define card-list (list VILLAGE
+                        COPPER
+                        SILVER
+                        GOLD
+                        ESTATE
+                        DUCHY
+                        PROVINCE))
+
+
+(define (name->bitmap name)
+  (make-object bitmap% (string-append "resources/" (string-downcase name) ".jpg")
+    'unknown false false 4.0))
 
 (define frame (new frame% [label "Test"]
                    [width 800]
@@ -213,14 +195,14 @@
   (if (empty? alist)
       "Board Created..."
       (let ([x (new button% [parent buy-board]
-                 [label (cdr (first alist))]
+                 [label (name->bitmap (card-name (first alist)))]
                  [callback (λ (button event)
-                             (send msg set-label (car (first alist))))])])
+                             (send msg set-label (card-name (first alist))))])])
         (create-buy-buttons (rest alist)))))
 (define buy-board (new horizontal-panel% [parent frame]
                    [alignment '(center top)]))
 
-(create-buy-buttons card-img-list)
+(create-buy-buttons card-list)
 
 ;; CARDS IN PLAY BY ANYONE
 (define in-play-board (new horizontal-panel% [parent frame]
@@ -232,10 +214,10 @@
   (if (empty? cards)
       "cards drawn..."
       (let ([x (new button% [parent player-board]
-                    [label (cdr (lookup-card (card-name (first cards)) card-img-list))]
+                    [label (name->bitmap (card-name (first cards)))]
                     [callback (λ (button event)
                                 (send msg set-label
-                                      (car (lookup-card (card-name (first cards)) card-img-list))))])])
+                                      (card-name (first cards))))])])
         (display-player-hand (rest cards)))))
 (define player-board (new horizontal-panel% [parent frame]
                           [alignment '(center bottom)]))
